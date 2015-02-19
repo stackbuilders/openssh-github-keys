@@ -21,17 +21,23 @@ sudo apt-get install haskell-platform
 cabal install openssh-github-keys --global
 ```
 
+This should install the binary `openssh-github-keys` under
+/usr/local/bin.
+
 Generate an application token which has read-only organization
 access. This will let the application read your teams and members
 (public keys have always been public).
 
-The OpenSSH `AuthorizedKeysCommand` cannot have any options specified
-(it is passed as an argument the user trying to log in), and we need
-to configure the command, so we should create a wrapper script
-containing the options for selecting the users to allow. Additionally
+The OpenSSH option `AuthorizedKeysCommand` cannot have any arguments
+specified following the command, and we need to pass options to
+specify which organization and team is used, as well as which user
+should be authenticated using keys in GitHub, so we will create a
+wrapper script for openssh-github-keys. Additionally
 `openssh-github-keys` will need your `GITHUB_TOKEN` which may be
 specified as a variable in the wrapper script, or in a
-[dotenv file](https://github.com/stackbuilders/dotenv-hs).
+[dotenv file](https://github.com/stackbuilders/dotenv-hs). Your
+wrapper script may look like the one below, which you could create as
+`/usr/local/bin/openssh-github-keys-wrapper`:
 
 ```bash
 #!/bin/bash
@@ -73,7 +79,7 @@ succeed.
 ## Security Notes
 
 Obviously, using this configuration means that your servers are only
-as secure as your Github organization. You should consider adding
+as secure as your GitHub organization. You should consider adding
 things like two-factor authentication for accounts which can modify
 your Github organization.
 
