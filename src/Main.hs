@@ -19,25 +19,35 @@ import Control.Monad (when)
 import System.FilePath (combine)
 
 data Options = Options
-  { organization :: String
+  { localUser    :: String
+  , organization :: String
   , team         :: String
+  , users        :: [String]
+
   } deriving (Show)
 
 
 fetchKeys :: Options -> IO ()
 fetchKeys opts = do
-  res <- runGitHub $ keysOfTeamInOrganization
-         (T.pack $ organization opts) (T.pack $ team opts)
+  if any (\u -> localUser opts == u) (users opts)
+    then do
+      res <- runGitHub $ keysOfTeamInOrganization
+             (T.pack $ organization opts) (T.pack $ team opts)
 
-  case res of
-    Right membersWithKeys ->
-      putStrLn $ unlines $ concatMap formatKey membersWithKeys
+      case res of
+        Right membersWithKeys ->
+          putStrLn $ unlines $ concatMap formatKey membersWithKeys
 
-    Left e -> error $ "Error retrieving keys for organization '" ++ show e
+        Left e -> error $ "Error retrieving keys for organization '" ++ show e
+
+    else return ()
 
 config :: Parser Options
 config = Options
-     <$> strOption (
+     <$> argument str (metavar "AUTHENTICATE"
+                       <> help "Local user trying to authenticate currently")
+
+     <*> strOption (
              long "organization"
              <> short 'o'
              <> metavar "ORGANIZATION"
@@ -48,6 +58,13 @@ config = Options
                   <> short 't'
                   <> metavar "TEAM"
                   <> help "GitHub team from which to select members' keys" )
+
+     <*> some (strOption (
+                  long "user"
+                  <> short 'u'
+                  <> metavar "USER"
+                  <> help "A local user that we should try to authenticate using Github" ))
+
 
 main :: IO ()
 main = do

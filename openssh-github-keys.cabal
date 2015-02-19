@@ -33,6 +33,7 @@ executable openssh-github-keys
                        , optparse-applicative
                        , directory
                        , filepath
+                       , unix
 
   hs-source-dirs:      src
   ghc-options:         -Wall
