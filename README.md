@@ -37,7 +37,7 @@ the above command.
 Obviously, using this configuration means that your servers are only
 as secure as your Github organization. You should consider adding
 things like two-factor authentication for accounts which can modify
-your Github account.
+your Github organization.
 
 ## License
 
