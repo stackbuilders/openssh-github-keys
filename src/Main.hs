@@ -15,15 +15,12 @@ import Network.Octohat.Types (runGitHub, Member(..), MemberWithKey(..),
 
 import qualified Configuration.Dotenv as Dotenv
 
-import System.Directory (doesFileExist, getHomeDirectory)
-import Control.Monad (when)
-import System.FilePath (combine)
-
 data Options = Options
   { localUser    :: String
   , organization :: String
   , team         :: String
   , users        :: [String]
+  , dotfile      :: Maybe FilePath
 
   } deriving (Show)
 
@@ -67,12 +64,21 @@ config = Options
                   <> metavar "USER"
                   <> help "A local user that we should try to authenticate using Github" ))
 
+     <*> strOptional (
+                  long "dotfile"
+                  <> short 'f'
+                  <> metavar "DOTFILE"
+                  <> help "File in 'dotfile' format specifying GITHUB_TOKEN" )
+
+strOptional :: Mod OptionFields String -> Parser (Maybe String)
+strOptional flags = Just <$> strOption flags <|> pure Nothing
 
 main :: IO ()
 main = do
-  readDotenvFile
+  options <- execParser opts
+  readDotenvFile options
+  fetchKeys options
 
-  execParser opts >>= fetchKeys
   where
     opts = info (helper <*> config)
       ( fullDesc
@@ -81,22 +87,18 @@ main = do
         [ "Fetches ssh public keys from TEAMS under ORGANIZATION on GitHub."
         , "The output format is suitable for AuthorizedKeysCommand in"
         , "sshd_config. Requires a github token, which can be specified"
-        , "in a Dotenv file in ~/.github_token, or in an environment variable"
-        , "GITHUB_TOKEN."])
+        , "in an environment variable GITHUB_TOKEN or in a dotenv file which"
+        , "can be specified with the -f option."])
 
      <> header "openssh-github-keys - fetches team member keys from GitHub"
       )
 
 -- | Conditionally reads the ~/.github_token file if it exists.
-readDotenvFile :: IO ()
-readDotenvFile = do
-  homePath <- getHomeDirectory
-  let githubTokenFile = combine homePath ".github_token"
-
-  dotenvFileExists <- doesFileExist githubTokenFile
-
-  when dotenvFileExists $ Dotenv.loadFile False githubTokenFile
-
+readDotenvFile :: Options -> IO ()
+readDotenvFile opts =
+  case dotfile opts of
+    Just f -> Dotenv.loadFile False f
+    Nothing -> return ()
 
 -- | Returns a list of keys for the user, with the username appended for easier
 -- identification.
