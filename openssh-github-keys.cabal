@@ -27,7 +27,7 @@ executable openssh-github-keys
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.5 && <4.8
-                       , octohat
+                       , octohat >=0.1.2
                        , dotenv
                        , text
                        , optparse-applicative

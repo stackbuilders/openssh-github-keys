@@ -10,7 +10,8 @@ import qualified Data.Text as T
 
 import Network.Octohat (keysOfTeamInOrganization)
 import Network.Octohat.Types (runGitHub, Member(..), MemberWithKey(..),
-                              PublicKey(..))
+                              PublicKey(..), OrganizationName(..),
+                              TeamName(..))
 
 import qualified Configuration.Dotenv as Dotenv
 
@@ -32,7 +33,8 @@ fetchKeys opts = do
   if any (\u -> localUser opts == u) (users opts)
     then do
       res <- runGitHub $ keysOfTeamInOrganization
-             (T.pack $ organization opts) (T.pack $ team opts)
+             (OrganizationName $ T.pack $ organization opts)
+             (TeamName $ T.pack $ team opts)
 
       case res of
         Right membersWithKeys ->
