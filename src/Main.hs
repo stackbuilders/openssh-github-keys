@@ -4,14 +4,13 @@ module Main where
 
 import Options.Applicative
 
-import Data.List (intercalate)
-
 import qualified Data.Text as T
 
 import Network.Octohat (keysOfTeamInOrganization)
-import Network.Octohat.Types (runGitHub, Member(..), MemberWithKey(..),
-                              PublicKey(..), OrganizationName(..),
+import Network.Octohat.Types (runGitHub, OrganizationName(..),
                               TeamName(..))
+
+import System.OpensshGithubKeys (formatKey)
 
 import qualified Configuration.Dotenv as Dotenv
 
@@ -99,12 +98,3 @@ readDotenvFile opts =
   case dotfile opts of
     Just f -> Dotenv.loadFile False f
     Nothing -> return ()
-
--- | Returns a list of keys for the user, with the username appended for easier
--- identification.
-formatKey :: MemberWithKey -> [String]
-formatKey mkeys =
-  map (\k -> intercalate " " [(T.unpack $ publicKey k), ghUsername])
-  (memberKey mkeys)
-
-  where ghUsername = (T.unpack . memberLogin . member) mkeys
