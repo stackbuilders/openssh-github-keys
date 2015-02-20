@@ -77,8 +77,8 @@ access to servers even if GitHub is unavailable or slow.
 
 It may be a concern that if GitHub goes down, certain users will not
 have access to your servers. To prevent this dependency, you may want
-certain users to be specified in the ~/.ssh/authorized_keys file. This
-file is used as a fallback if the AuthorizedKeysCommand does not
+certain users to be specified in the `~/.ssh/authorized_keys` file. This
+file is used as a fallback if the `AuthorizedKeysCommand` does not
 succeed.
 
 ### GitHub latency
