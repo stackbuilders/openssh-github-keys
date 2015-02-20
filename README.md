@@ -2,9 +2,9 @@
 
 # openssh-github-keys
 
-You already have developers organized in GitHub teams, and GitHub
-knows the public keys of everyone on your team. Why not use GitHub to
-control access to your servers via SSH?
+Your developers are organized in GitHub teams, and GitHub has
+everyone's public key. Why are you still manually editing the
+`authorized_keys` file on your servers?
 
 ## Operating Details
 
@@ -68,7 +68,12 @@ wrapper script, or point to a
 file containing
 this token.
 
-## Availability Notes
+## Availability
+
+`openssh-github-keys` takes precautions to ensure that you don't lose
+access to servers even if GitHub is unavailable or slow.
+
+### GitHub unreachable
 
 It may be a concern that if GitHub goes down, certain users will not
 have access to your servers. To prevent this dependency, you may want
@@ -76,20 +81,24 @@ certain users to be specified in the ~/.ssh/authorized_keys file. This
 file is used as a fallback if the AuthorizedKeysCommand does not
 succeed.
 
-## Security Notes
-
-Obviously, using this configuration means that your servers are only
-as secure as your GitHub organization. You should consider adding
-things like two-factor authentication for accounts which can modify
-your Github organization.
-
-## Timeouts
+### GitHub latency
 
 `openssh-github-keys` will time out if keys are not able to be
 retrieved in five seconds. This allows other authentication
 mechanisms, such as the authorized_keys file to be consulted so that
 login can proceed for certain users even in the event of an unusual
 amount of latency while communicating with GitHub.
+
+## Security
+
+Using a tool such as `openssh-github-keys` this configuration means
+that your servers are only as secure as GitHub, and your GitHub
+organization. You should consider adding things like two-factor
+authentication for accounts which can modify your Github
+organization. If you cannot afford to have your servers compromised in
+the event of a major security breach at GitHub you should not use
+`openssh-github-keys`.
+
 
 ## License
 
