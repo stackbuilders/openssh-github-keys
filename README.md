@@ -6,6 +6,11 @@ Your developers are organized in GitHub teams, and GitHub has
 everyone's public key. Why are you still manually editing the
 `authorized_keys` file on your servers?
 
+# Stability
+
+Experimental. This program has not yet been subjected to production
+testing. Feedback and pull requests are welcome.
+
 ## Operating Details
 
 Newer versions of OpenSSH have an option that allows you to pull a
