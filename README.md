@@ -18,11 +18,11 @@ First, you need to install the `openssh-github-keys` command:
 
 ```
 sudo apt-get install haskell-platform
-cabal install openssh-github-keys --global
+sudo cabal install openssh-github-keys --global
 ```
 
 This should install the binary `openssh-github-keys` under
-/usr/local/bin.
+`/usr/local/bin`.
 
 Generate an application token which has read-only organization
 access. This will let the application read your teams and members

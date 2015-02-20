@@ -1,12 +1,17 @@
 name:                openssh-github-keys
 version:             0.1.0.0
-synopsis:            Fetch OpenSSH keys from a Github team
+synopsis:            Fetch OpenSSH keys from a GitHub team
 description:
   .
   This package fetches the OpenSSH public keys for all users from a
-  Github team. It is intended to be executed from the AuthorizedKeys
+  GitHub team. It is intended to be executed from the AuthorizedKeys
   command in the sshd_config file, which then allows users to log in
   using keys that they have in their Github accounts.
+  .
+
+  Please see the
+  <https://github.com/stackbuilders/openssh-github-keys GitHub page>
+  for detailed usage information.
   .
 homepage:            https://github.com/stackbuilders/openssh-github-keys
 license:             MIT
