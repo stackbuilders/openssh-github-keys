@@ -12,6 +12,8 @@ import Network.Octohat.Types (runGitHub, OrganizationName(..),
 
 import System.OpensshGithubKeys (formatKey)
 
+import System.Timeout (timeout)
+
 import qualified Configuration.Dotenv as Dotenv
 
 data Options = Options
@@ -76,9 +78,15 @@ main :: IO ()
 main = do
   options <- execParser opts
   readDotenvFile options
-  fetchKeys options
+
+  res <- timeout allowedTime (fetchKeys options)
+  case res of
+    Nothing -> error $ "Allowed time of " ++ show allowedTime ++
+               " microseconds exceeded while fetching keys from GitHub."
+    Just  _ -> return ()
 
   where
+    allowedTime = 5 * 1000000 -- Allowed time in microseconds for fetching keys
     opts = info (helper <*> config)
       ( fullDesc
 

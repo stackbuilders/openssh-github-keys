@@ -83,6 +83,14 @@ as secure as your GitHub organization. You should consider adding
 things like two-factor authentication for accounts which can modify
 your Github organization.
 
+## Timeouts
+
+`openssh-github-keys` will time out if keys are not able to be
+retrieved in five seconds. This allows other authentication
+mechanisms, such as the authorized_keys file to be consulted so that
+login can proceed for certain users even in the event of an unusual
+amount of latency while communicating with GitHub.
+
 ## License
 
 MIT
