@@ -31,7 +31,7 @@ This should install the binary `openssh-github-keys` under
 
 Generate an application token which has read-only organization
 access. This will let the application read your teams and members
-(public keys have always been public).
+(SSH public keys added by users have always been public on GitHub).
 
 The OpenSSH option `AuthorizedKeysCommand` cannot have any arguments
 specified following the command, and we need to pass options to
@@ -55,8 +55,25 @@ wrapper script may look like the one below, which you could create as
     $1
 ```
 
-Make sure this script is executable and owned by the `root` user (`chmod 755
+Make sure this script is executable and owned by the `root` user (`chmod 700
 /usr/local/bin/openssh-github-keys-wrapper`).
+
+The `openssh-github-keys` script will need to know your GitHub
+token. You can specify this as a variable `GITHUB_TOKEN` in your
+wrapper script, or point to a file containing this token. If you
+specify it in a file, such as ~root/.github_read_org_token, the file
+format should contain a key, `GITHUB_TOKEN` and the value as follows:
+
+    GITHUB_TOKEN=mygithubtoken
+
+At this point you should be able to test that the script is properly
+installed. Invoke the wrapper script with the user you intend to log
+in as using keys on a GitHub team:
+
+    openssh-github-keys-wrapper mylocaluser
+
+You should see a list of keys printed, corresponding to the GitHub
+users on your team.
 
 In your `/etc/ssh/sshd_config`, add the option for
 AuthorizedKeysCommand to point to your wrapper script. You will also
@@ -64,19 +81,34 @@ need to specify the user to run the script:
 
 ```
 AuthorizedKeysCommand /usr/local/bin/openssh-github-keys-wrapper
-AuthorizedKeysUser root
+AuthorizedKeysCommandUser root
 ```
 
-The `openssh-github-keys` script will need to know your GitHub
-token. You can specify this as a variable `GITHUB_TOKEN` in your
-wrapper script, or point to a
-file containing
-this token.
 
-## Availability
+You should test the syntax of your sshd_config file by using `sshd
+-t`. Then, if all is well, restart the ssh service with `service ssh restart`.
+
+## Troubleshooting
+
+The following troubleshooting steps are recommended if you have issues
+using openssh-github-keys:
+
+* Make sure that you can invoke openssh-github-keys-wrapper, passing
+  the user to authenticate as the first argument. This should return a
+  list of valid SSH public keys that can be used for authentication.
+* Check the output of /var/log/auth.log to see why login may be
+  failing.
+* Change the sshd log level, by changing the line in `sshd_config` for
+  `LogLevel` to `DEBUG`. Restart the sshd service with `service ssh
+  restart` or the equivalent on your platform.
+
+## `openssh-github-keys` and GitHub Failure Conditions
 
 `openssh-github-keys` takes precautions to ensure that you don't lose
-access to servers even if GitHub is unavailable or slow.
+access to servers even if GitHub is unavailable or slow. Below we
+describe the different types of failure that we've anticipated at
+GitHub, and how openssh-github-keys should behave when these
+conditions are detected.
 
 ### GitHub unreachable
 
@@ -103,6 +135,14 @@ authentication for accounts which can modify your Github
 organization. If you cannot afford to have your servers compromised in
 the event of a major security breach at GitHub you should not use
 `openssh-github-keys`.
+
+## Precautionary Installation Suggestions
+
+Since openssh-github-keys is just an experimental library, you may
+want to have a user account that relies on a standard authorized_keys
+file for a small group of primary users (e.g., system administrators)
+and give the rest of your team access through the GitHub
+authentication mechanism.
 
 
 ## License
