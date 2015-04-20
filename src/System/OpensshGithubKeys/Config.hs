@@ -1,22 +1,23 @@
-module System.OpensshGithubKeys.Config (options, readDefaultValues) where
+module System.OpensshGithubKeys.Config (options, readFileOptions) where
 
-import           Control.Applicative            ((<$>), (<*>))
+import           Control.Applicative            (pure, (<$>), (<*>), (<|>))
 import           Control.Exception.Base         (handle, throw)
 import           Data.KeywordArgs.Parse         (configParser)
-import           Data.Maybe                     (mapMaybe)
 import           Data.Monoid                    (mconcat, (<>))
 import           Options.Applicative            (InfoMod, Mod, OptionFields,
                                                  Parser, ParserInfo, argument,
                                                  fullDesc, header, help, helper,
-                                                 info, long, metavar, optional,
-                                                 progDesc, short, some, str,
-                                                 strOption, value)
+                                                 info, long, metavar, progDesc,
+                                                 short, some, str, strOption,
+                                                 value)
 import           System.IO.Error                (isDoesNotExistError)
-import           System.OpensshGithubKeys.Types (Options (..))
+import           System.OpensshGithubKeys.Types (FileOptions (..), Options (..),
+                                                 emptyFileOptions,
+                                                 mapToFileOptions)
 import           Text.Parsec                    (ParseError, parse)
 
-options :: [(String, String)] -> ParserInfo Options
-options d = info (helper <*> optionsParser d) infoMod
+options :: FileOptions -> ParserInfo Options
+options fo = info (helper <*> optionsParser fo) infoMod
   where
     infoMod :: InfoMod a
     infoMod = mconcat [ fullDesc
@@ -32,12 +33,12 @@ options d = info (helper <*> optionsParser d) infoMod
                    , "can be specified with the -f option."
                    ]
 
-optionsParser :: [(String, String)] -> Parser Options
-optionsParser v = Options <$> authenticateArgument
-                  <*> organizationOption (lookup "organization" v)
-                  <*> teamOption (lookup "team" v)
-                  <*> usersOption
-                  <*> dotfileOption (lookup "dotfile" v)
+optionsParser :: FileOptions -> Parser Options
+optionsParser fo = Options <$> authenticateArgument
+                    <*> organizationOption (fileOptionsOrganization fo)
+                    <*> teamOption (fileOptionsTeam fo)
+                    <*> usersOption (fileOptionsUsers fo)
+                    <*> dotfileOption
 
 authenticateArgument :: Parser String
 authenticateArgument = argument str $ metavar "AUTHENTICATE" <> help "Local user trying to authenticate currently"
@@ -57,8 +58,9 @@ teamOption v = optionWithDefaultValue v [ long "team"
                                         , help "GitHub team from which to select members' keys"
                                         ]
 
-usersOption :: Parser [String]
-usersOption = some userOption
+usersOption :: Maybe [String] -> Parser [String]
+usersOption Nothing   = some userOption
+usersOption (Just xs) = some userOption <|> pure xs
 
 userOption :: Parser String
 userOption = optionConcat [ long "user"
@@ -67,12 +69,13 @@ userOption = optionConcat [ long "user"
                           , help "A local user that we should try to authenticate using Github"
                           ]
 
-dotfileOption :: Maybe String -> Parser (Maybe String)
-dotfileOption v = optional $ optionWithDefaultValue v [ long "dotfile"
-                                                      , short 'f'
-                                                      , metavar "DOTFILE"
-                                                      , help "File in 'dotfile' format specifying GITHUB_TOKEN"
-                                                      ]
+dotfileOption :: Parser String
+dotfileOption = optionConcat [ long "dotfile"
+                             , short 'f'
+                             , metavar "DOTFILE"
+                             , help "File in 'dotfile' format specifying GITHUB_TOKEN"
+                             , value "/etc/openssh-github-keys/github.creds"
+                             ]
 
 optionWithDefaultValue :: Maybe String -> [Mod OptionFields String] -> Parser String
 optionWithDefaultValue Nothing  xs = optionConcat xs
@@ -81,24 +84,17 @@ optionWithDefaultValue (Just v) xs = strOption $ mconcat xs <> value v
 optionConcat :: [Mod OptionFields String] -> Parser String
 optionConcat = strOption . mconcat
 
-readDefaultValues :: FilePath -> IO [(String, String)]
-readDefaultValues fp = handle readHandler $ do
+readFileOptions :: FilePath -> IO FileOptions
+readFileOptions fp = handle readHandler $ do
   content <- readFile fp
   case parseContent content of
     Left e  -> error $ concat ["Unable to parse file \"" , fp ,"\" cause: ",  show e]
-    Right c -> return $ toSingleValueMap c
+    Right c -> return $ mapToFileOptions c
 
-readHandler :: IOError -> IO [(String, String)]
+readHandler :: IOError -> IO FileOptions
 readHandler e
-      | isDoesNotExistError e = return []
+      | isDoesNotExistError e = return emptyFileOptions
       | otherwise             = throw e
-
-toSingleValueMap :: [(String, [String])] -> [(String, String)]
-toSingleValueMap = mapMaybe toSingleValue
-  where
-    toSingleValue :: (String, [String]) -> Maybe (String, String)
-    toSingleValue (_, [])  = Nothing
-    toSingleValue (k, v:_) = Just (k, v)
 
 parseContent :: String -> Either ParseError [(String, [String])]
 parseContent = parse configParser "(openssh-github-keys)"
