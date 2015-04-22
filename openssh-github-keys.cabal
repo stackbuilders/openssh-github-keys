@@ -31,7 +31,7 @@ executable openssh-github-keys
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.5 && <4.8
+  build-depends:       base >=4.5 && <4.9
                        , octohat >=0.1.2
                        , dotenv
                        , text
@@ -50,7 +50,7 @@ executable openssh-github-keys
 library
   exposed-modules:    System.OpensshGithubKeys
 
-  build-depends:         base >=4.5 && <4.8
+  build-depends:         base >=4.5 && <4.9
                        , octohat >=0.1.2
                        , text
 
@@ -63,7 +63,7 @@ test-suite openssh-github-keys-test
   type: exitcode-stdio-1.0
   hs-source-dirs: spec, src
   main-is: Spec.hs
-  build-depends:       base >=4.5 && <4.8
+  build-depends:       base >=4.5 && <4.9
                        , octohat >=0.1.2
                        , text
                        , hspec
