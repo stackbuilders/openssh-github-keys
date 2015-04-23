@@ -10,7 +10,7 @@ import           Network.Octohat.Types           (OrganizationName (..),
                                                   TeamName (..), runGitHub)
 import           Options.Applicative
 import           System.OpensshGithubKeys        (formatKey)
-import           System.OpensshGithubKeys.Config (options, readDefaultValues)
+import           System.OpensshGithubKeys.Config (options, readFileOptions)
 import           System.OpensshGithubKeys.Types  (Options (..))
 import           System.Timeout                  (timeout)
 
@@ -26,7 +26,7 @@ fetchKeys os = when (any (\u -> localUser os == u) (users os)) $ do
 
 main :: IO ()
 main = do
-  d <- readDefaultValues "/etc/openssh-github-keys.conf"
+  d <- readFileOptions "/etc/openssh-github-keys/login.conf"
   opts <- execParser $ options d
   readDotenvFile opts
   res <- timeout allowedTime (fetchKeys opts)
@@ -40,7 +40,4 @@ main = do
 
 -- | Conditionally reads the ~/.github_token file if it exists.
 readDotenvFile :: Options -> IO ()
-readDotenvFile os =
-  case dotfile os of
-    Just f -> Dotenv.loadFile False f
-    Nothing -> return ()
+readDotenvFile = Dotenv.loadFile False . dotfile

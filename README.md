@@ -37,53 +37,50 @@ The OpenSSH option `AuthorizedKeysCommand` cannot have any arguments
 specified following the command, and we need to pass options to
 specify which organization and team is used, as well as which user
 should be authenticated using keys in GitHub, so we will create a
-wrapper script for openssh-github-keys. Additionally
-`openssh-github-keys` will need your `GITHUB_TOKEN` which may be
-specified as a variable in the wrapper script, or in a
-[dotenv file](https://github.com/stackbuilders/dotenv-hs). Your
-wrapper script may look like the one below, which you could create as
-`/usr/local/bin/openssh-github-keys-wrapper`:
+configuration file for openssh-github-keys. Additionally
+`openssh-github-keys` will need your `GITHUB_TOKEN` which must be
+specified inside the `/etc/openssh-github-keys/github.creds` file, or
+on the command line. Your configuration file may look like the one below,
+which you create as `/etc/openssh-github-keys/login.conf`:
 
 ```bash
-#!/bin/bash
-
-/usr/local/bin/openssh-github-keys \
-    -o your-github-org \
-    -t your-github-team \
-    -u user-to-auth-with-github \
-    -f /path/to/your/github-token-dotenv-file \
-    $1
+organization your-github-org
+team your-github-team
+users user-to-auth-with-github ...
 ```
-
-Make sure this script is executable and owned by the `root` user (`chmod 700
-/usr/local/bin/openssh-github-keys-wrapper`).
 
 The `openssh-github-keys` script will need to know your GitHub
 token. You can specify this as a variable `GITHUB_TOKEN` in your
-wrapper script, or point to a file containing this token. If you
-specify it in a file, such as ~root/.github_read_org_token, the file
+`/etc/openssh-github-keys/github.creds` configuration file, the file
 format should contain a key, `GITHUB_TOKEN` and the value as follows:
 
     GITHUB_TOKEN=mygithubtoken
 
-At this point you should be able to test that the script is properly
-installed. Invoke the wrapper script with the user you intend to log
-in as using keys on a GitHub team:
+Make sure this file is owned by the `nobody` user (`chmod 600
+/etc/openssh-github-keys/github.creds`).
 
-    openssh-github-keys-wrapper mylocaluser
+At this point you should be able to test that the command is properly
+configured. Invoke the command with the user you intend to log in as
+using keys on a GitHub team:
 
-You should see a list of keys printed, corresponding to the GitHub
-users on your team.
+```bash
+# Print list of keys, corresponding to the GitHub users on your team
+openssh-github-keys mylocaluser
+```
+
+Note that if you pass any user that is not specified in the configuration
+as a user to log in using GitHub keys, the command will return immediately.
+This will allow other users to log in only using locally-configured keys,
+and without any delay induced by network communication to GitHub's API.
 
 In your `/etc/ssh/sshd_config`, add the option for
 AuthorizedKeysCommand to point to your wrapper script. You will also
 need to specify the user to run the script:
 
+```bash
+AuthorizedKeysCommand openssh-github-keys
+AuthorizedKeysCommandUser nobody
 ```
-AuthorizedKeysCommand /usr/local/bin/openssh-github-keys-wrapper
-AuthorizedKeysCommandUser root
-```
-
 
 You should test the syntax of your sshd_config file by using `sshd
 -t`. Then, if all is well, restart the ssh service with `service ssh restart`.
