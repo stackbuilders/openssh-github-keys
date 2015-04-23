@@ -1,5 +1,5 @@
 name:                openssh-github-keys
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            Fetch OpenSSH keys from a GitHub team
 description:
   .
