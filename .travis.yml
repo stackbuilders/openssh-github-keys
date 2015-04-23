@@ -4,10 +4,6 @@ env:
   - GHC_VERSION=7.8.4  CABAL_VERSION=1.20
   - GHC_VERSION=7.10.1 CABAL_VERSION=1.22
 
-matrix:
-  allow_failures:
-    - env: GHC_VERSION=7.10.1 CABAL_VERSION=1.22        
-
 before_install:
   - sudo add-apt-repository -y ppa:hvr/ghc
   - sudo apt-get update
