@@ -19,15 +19,15 @@ OpenSSH allows login using the selected user accounts.
 
 ## Usage
 
-First, you need to install the `openssh-github-keys` command:
+First, you need to install the `openssh-github-keys` tool:
 
-```
-sudo apt-get install haskell-platform
-sudo cabal install openssh-github-keys --global
+```bash
+$ curl -sSL https://get.haskellstack.org/ | sh
+$ stack setup
+$ stack install openssh-github-keys
 ```
 
-This should install the binary `openssh-github-keys` under
-`/usr/local/bin`.
+This should install the binary `openssh-github-keys` under `~/.local/bin`.
 
 Generate an application token which has read-only organization
 access. This will let the application read your teams and members
@@ -37,16 +37,15 @@ The OpenSSH option `AuthorizedKeysCommand` cannot have any arguments
 specified following the command, and we need to pass options to
 specify which organization and team is used, as well as which user
 should be authenticated using keys in GitHub, so we will create a
-configuration file for openssh-github-keys. Additionally
+configuration file for `openssh-github-keys`. Additionally
 `openssh-github-keys` will need your `GITHUB_TOKEN` which must be
 specified inside the `/etc/openssh-github-keys/github.creds` file, or
 on the command line. Your configuration file may look like the one below,
-which you create as `/etc/openssh-github-keys/login.conf`:
+which you create as `/etc/openssh-github-keys/settings.yaml`:
 
-```bash
-organization your-github-org
-team your-github-team
-users user-to-auth-with-github ...
+```yaml
+organization: your-github-org
+team: your-github-team
 ```
 
 The `openssh-github-keys` script will need to know your GitHub
@@ -54,7 +53,9 @@ token. You can specify this as a variable `GITHUB_TOKEN` in your
 `/etc/openssh-github-keys/github.creds` configuration file, the file
 format should contain a key, `GITHUB_TOKEN` and the value as follows:
 
-    GITHUB_TOKEN=mygithubtoken
+```
+GITHUB_TOKEN=mygithubtoken
+```
 
 Make sure this file is owned by the `nobody` user (`chmod 600
 /etc/openssh-github-keys/github.creds`).
@@ -73,9 +74,9 @@ as a user to log in using GitHub keys, the command will return immediately.
 This will allow other users to log in only using locally-configured keys,
 and without any delay induced by network communication to GitHub's API.
 
-In your `/etc/ssh/sshd_config`, add the option for
-AuthorizedKeysCommand to point to your wrapper script. You will also
-need to specify the user to run the script:
+In your `/etc/ssh/sshd_config`, add the option for `AuthorizedKeysCommand`
+to point to your wrapper script. You will also need to specify the user to
+run the script:
 
 ```bash
 AuthorizedKeysCommand openssh-github-keys
@@ -135,12 +136,11 @@ the event of a major security breach at GitHub you should not use
 
 ## Precautionary Installation Suggestions
 
-Since openssh-github-keys is just an experimental library, you may
+Since `openssh-github-keys` is just an experimental library, you may
 want to have a user account that relies on a standard authorized_keys
 file for a small group of primary users (e.g., system administrators)
 and give the rest of your team access through the GitHub
 authentication mechanism.
-
 
 ## License
 
