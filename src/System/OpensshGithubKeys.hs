@@ -1,3 +1,16 @@
+-- |
+-- Module      :  System.OpensshGithubKeys
+-- Copyright   :  © 2015-2017 Stack Builders
+-- License     :  MIT
+--
+-- Maintainer  :  hackage@stackbuilders.com
+-- Stability   :  experimental
+-- Portability :  portable
+--
+-- The module allows to fetch list of per-teammate SSH public keys given
+-- GitHub organization name and team name.
+
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -12,8 +25,12 @@ import Data.List (find)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Network.HTTP.Req
-import Numeric.Natural
 import qualified Data.ByteString.Char8 as B8
+
+#if !MIN_VERSION_base(4,8,0)
+import Control.Applicative
+import Data.Monoid (mempty)
+#endif
 
 -- | Get pairs of user names and corresponding SSH keys for team members.
 
@@ -48,7 +65,7 @@ fetchTeamKeys token orgName teamName' = do
 -- Helpers
 
 data Team = Team
-  { teamId   :: Natural
+  { teamId   :: Integer
   , teamName :: Text }
 
 instance FromJSON Team where

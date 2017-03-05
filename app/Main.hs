@@ -5,7 +5,6 @@
 module Main (main) where
 
 import Control.Exception
-import Control.Monad
 import Data.Maybe (fromMaybe)
 import Data.Monoid
 import Data.Text (Text)
@@ -81,9 +80,11 @@ instance MonadHttp IO where
 main :: IO ()
 main = do
   Opts {..} <- execParser parserInfo
-  forM_ optsDotenvFile $ \path ->
-    D.onMissingFile (D.loadFile True path) $
-      putStrLn ("Could not load env variables from: \"" ++ path ++ "\"")
+  case optsDotenvFile of
+    Nothing -> return ()
+    Just path ->
+      D.onMissingFile (D.loadFile True path) $
+        putStrLn ("Could not load env variables from: \"" ++ path ++ "\"")
   gitHubToken <- B8.pack <$> getEnv "GITHUB_TOKEN"
   econfig <- Yaml.decodeFileEither optsSettingsFile
   case econfig of
