@@ -1,4 +1,4 @@
-Copyright (c) 2015 Justin Leitgeb
+Copyright (c) 2015-2017 Justin Leitgeb
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
