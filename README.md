@@ -46,6 +46,7 @@ which you create as `/etc/openssh-github-keys/settings.yaml`:
 ```yaml
 organization: your-github-org
 team: your-github-team
+cache_file: /home/stackbuilders/openssh-github-cache
 ```
 
 The `openssh-github-keys` script will need to know your GitHub
