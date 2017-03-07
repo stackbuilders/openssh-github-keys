@@ -12,9 +12,11 @@ import Network.HTTP.Req (MonadHttp (..))
 import Options.Applicative
 import System.Environment (getEnv)
 import System.Exit
+import System.IO.Error (isDoesNotExistError)
 import System.OpensshGithubKeys (fetchTeamKeys)
 import qualified Config                as C
 import qualified Configuration.Dotenv  as D
+import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text             as T
 import qualified Data.Text.Encoding    as T
@@ -97,11 +99,21 @@ main = do
       r <- try (fetchTeamKeys gitHubToken orgName teamName)
       case r of
         Left err -> do
-          print (err :: SomeException)
-          exitFailure
+          let f x = if isDoesNotExistError x then Just x else Nothing
+          ecache <- tryJust f (B.readFile configCacheFile)
+          case ecache of
+            Left readErr -> do
+              print (err :: SomeException)
+              print readErr
+              exitFailure
+            Right cache -> do
+              B.putStr cache
+              exitSuccess
         Right keys -> do
           let formatKey (login, ks) =
                 let f k = k <> " " <> T.encodeUtf8 login
                 in f <$> ks
-          (B8.putStrLn . B8.unlines . concat) (formatKey <$> keys)
+              output = (B8.unlines . concat) (formatKey <$> keys)
+          B.putStr output
+          B.writeFile configCacheFile output
           exitSuccess
