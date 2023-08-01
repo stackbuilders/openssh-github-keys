@@ -1,6 +1,9 @@
 [![Build Status](https://travis-ci.org/stackbuilders/openssh-github-keys.svg?branch=master)](https://travis-ci.org/stackbuilders/openssh-github-keys) [![Hackage](https://img.shields.io/hackage/v/openssh-github-keys.svg)](http://hackage.haskell.org/package/openssh-github-keys)
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 
-# openssh-github-keys
+> **⚠️ Warning:** This library has been deprecated and is no longer maintained. It will not receive any further security patches, features, or bug fixes and is preserved here at GitHub for archival purposes. If you want to use it, we suggest forking the repository and auditing the codebase before use. For more information, contact us at info@stackbuilders.com.
+
+# DEPRECATED - openssh-github-keys
 
 Your developers are organized in GitHub teams, and GitHub has
 everyone's public key. Why are you still manually editing the
@@ -144,8 +147,12 @@ authentication mechanism.
 
 ## License
 
-MIT
+MIT, see [the LICENSE file](LICENSE).
 
 ## Author
 
 [Stack Builders](http://www.stackbuilders.com/)
+
+---
+<img src="https://cdn.stackbuilders.com/media/images/Sb-supports.original.png" alt="Stack Builders" width="50%"></img>  
+[Check out our libraries](https://github.com/stackbuilders/) | [Join our team](https://www.stackbuilders.com/join-us/)
